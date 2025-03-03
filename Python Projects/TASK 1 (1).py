@@ -3,7 +3,6 @@
 
 # ## TASK 1
 
-# In[1]:
 
 
 import tkinter as tk
@@ -81,22 +80,4 @@ status_label = tk.Label(root, text="", font="Times 10")
 status_label.pack()
 
 root.mainloop()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[2]:
-
-
-
 
