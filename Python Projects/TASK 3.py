@@ -28,15 +28,15 @@ def password():
         show_message("Password length must be at least 4", "red")
         return
 
-    # Define character pools
+ 
     characters = string.ascii_uppercase + string.ascii_lowercase + string.digits + string.punctuation
 
-    # Generate password by randomly selecting characters
+   
     password_chars = [random.choice(characters) for _ in range(length)]
     random.shuffle(password_chars)
     generated_password = ''.join(password_chars)
 
-    # Display the generated password
+  
     E2.delete(0, tkinter.END)
     E2.insert(0, generated_password)
     show_message("Password generated successfully!", "green")
@@ -54,7 +54,7 @@ def reset_password():
     E2.delete(0, tkinter.END)
     show_message("", "black")
 
-# GUI setup
+
 window = tkinter.Tk()
 window.title("Password Generator")
 
@@ -76,7 +76,7 @@ tkinter.Button(window, text="GENERATE PASSWORD", bg="Blue", fg="white", command=
 tkinter.Button(window, text="ACCEPT", fg="Blue", command=clear_all).grid(row=5, column=1, pady=5)
 tkinter.Button(window, text="RESET", fg="Blue", command=reset_password).grid(row=6, column=1, pady=5)
 
-# Status label for messages
+
 status_label = tkinter.Label(window, text="", font="Times 10")
 status_label.grid(row=7, column=0, columnspan=2)
 
