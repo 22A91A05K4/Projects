@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 10px;
+        }
+
+        /* Main Layout */
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .column {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .left-column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Book List */
+        .search-container {
+            margin-bottom: 15px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .book-list {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .book-list th, .book-list td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .book-list th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+
+        .book-list tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+
+        .book-list tr.selected {
+            background-color: #e3f2fd;
+        }
+
+        .book-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Book Details */
+        .book-details {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        /* User Controls */
+        .user-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
+            min-width: 80px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .primary-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .secondary-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .secondary-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .info-btn {
+            background-color: #f39c12;
+            color: white;
+            width: 100%;
+        }
+
+        .info-btn:hover {
+            background-color: #e67e22;
+        }
+
+        /* Messages */
+        .message-area {
+            height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: white;
+        }
+
+        .message {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .timestamp {
+            color: #777;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 70%;
+            max-width: 700px;
+            border-radius: 5px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+
+        /* Status Indicator */
+        .status-available {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .status-borrowed {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Book Details Modal */
+        #bookDetailsModal .modal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .book-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .book-modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .book-modal-body {
+            display: flex;
+            gap: 20px;
+        }
+
+        .book-image-container {
+            flex: 0 0 200px;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .book-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .book-info {
+            flex: 1;
+        }
+
+        .book-info-row {
+            margin-bottom: 15px;
+        }
+
+        .book-info-label {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Library Management System</h1>
+            <p id="greeting">Welcome to the Library Management System</p>
+        </header>
+
+        <div class="main-content">
+            <div class="left-column column">
+                <h2>Library Books</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search for books...">
+                </div>
+                <div class="book-list-container">
+                    <table class="book-list" id="bookList">
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookListBody">
+                            <!-- Book list will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="column">
+                    <h2>Book Details</h2>
+                    <div class="book-details" id="bookDetails">
+                        <p>Select a book to see details</p>
+                    </div>
+                </div>
+
+                <div class="column user-controls">
+                    <div class="input-group">
+                        <label for="userName">Your Name:</label>
+                        <input type="text" id="userName" placeholder="Enter your name">
+                    </div>
+                    <div class="button-group">
+                        <button class="primary-btn" id="borrowBtn">Borrow Book</button>
+                        <button class="secondary-btn" id="returnBtn">Return Book</button>
+                    </div>
+                    <button class="info-btn" id="historyBtn">Show Transaction History</button>
+                </div>
+
+                <div class="column">
+                    <h2>Messages</h2>
+                    <div class="message-area" id="messageArea">
+                        <!-- Messages will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Transaction History</h2>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <!-- Book Details Modal -->
+    <div id="bookDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="book-modal-header">
+                <h2 id="modalBookTitle">Book Title</h2>
+                <span class="close" id="closeBookModal">&times;</span>
+            </div>
+            <div class="book-modal-body">
+                <div class="book-image-container">
+                    <img id="bookImage" src="" alt="Book cover">
+                </div>
+                <div class="book-info">
+                    <div class="book-info-row">
+                        <div class="book-info-label">Author:</div>
+                        <div id="bookAuthor"></div>
+                    </div>
+                    <div class="book-info-row">
+                        <div class="book-info-label">Published By:</div>
+                        <div id="bookPublisher"></div>
+                    </div>
+                    <div class="book-info-row">
+                        <div class="book-info-label">Publication Year:</div>
+                        <div id="bookYear"></div>
+                    </div>
+                    <div class="book-info-row">
+                        <div class="book-info-label">Description:</div>
+                        <div id="bookDescription"></div>
+                    </div>
+                    <div class="book-info-row">
+                        <div class="book-info-label">Status:</div>
+                        <div id="bookStatus"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Library Class
+        class Library {
+            constructor() {
+                this.books = {
+                    // Enhanced book data with author, publisher, year, and image URL
+                    "1984": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A dystopian novel that explores the dangers of totalitarianism.",
+                        "author": "George Orwell",
+                        "publisher": "Secker & Warburg",
+                        "year": "1949",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "To Kill a Mockingbird": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A novel that addresses serious issues of race and injustice.",
+                        "author": "Harper Lee",
+                        "publisher": "J. B. Lippincott & Co.",
+                        "year": "1960",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "The Great Gatsby": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A novel that critiques the American Dream through the story of Jay Gatsby.",
+                        "author": "F. Scott Fitzgerald",
+                        "publisher": "Charles Scribner's Sons",
+                        "year": "1925",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "Moby Dick": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A novel that follows Captain Ahab's obsessive quest for revenge against Moby Dick.",
+                        "author": "Herman Melville",
+                        "publisher": "Harper & Brothers",
+                        "year": "1851",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "The Catcher in the Rye": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A novel that explores teenage rebellion and identity.",
+                        "author": "J.D. Salinger",
+                        "publisher": "Little, Brown and Company",
+                        "year": "1951",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "Pride and Prejudice": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A classic novel that examines social class and relationships in 19th-century England.",
+                        "author": "Jane Austen",
+                        "publisher": "T. Egerton, Whitehall",
+                        "year": "1813",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "The Hobbit": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A fantasy novel that follows Bilbo Baggins on an epic quest.",
+                        "author": "J.R.R. Tolkien",
+                        "publisher": "George Allen & Unwin",
+                        "year": "1937",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "Harry Potter and the Sorcerer's Stone": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "The first book in a series about a young wizard's adventures.",
+                        "author": "J.K. Rowling",
+                        "publisher": "Bloomsbury",
+                        "year": "1997",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "The Alchemist": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A philosophical novel about following one's dreams.",
+                        "author": "Paulo Coelho",
+                        "publisher": "HarperOne",
+                        "year": "1988",
+                        "image": "/api/placeholder/200/300"
+                    },
+                    "Brave New World": {
+                        "available": true,
+                        "borrowed_by": null,
+                        "description": "A dystopian novel exploring a futuristic society controlled by technology.",
+                        "author": "Aldous Huxley",
+                        "publisher": "Chatto & Windus",
+                        "year": "1932",
+                        "image": "/api/placeholder/200/300"
+                    }
+                };
+                this.history = [];
+                // Load data from localStorage if available
+                this.loadData();
+            }
+
+            loadData() {
+                const savedBooks = localStorage.getItem('libraryBooks');
+                const savedHistory = localStorage.getItem('libraryHistory');
+                
+                if (savedBooks) {
+                    this.books = JSON.parse(savedBooks);
+                }
+                
+                if (savedHistory) {
+                    this.history = JSON.parse(savedHistory);
+                }
+            }
+
+            saveData() {
+                localStorage.setItem('libraryBooks', JSON.stringify(this.books));
+                localStorage.setItem('libraryHistory', JSON.stringify(this.history));
+            }
+
+            listAllBooks() {
+                return Object.keys(this.books);
+            }
+
+            getBookStatus(bookName) {
+                if (this.books[bookName]) {
+                    if (this.books[bookName].available) {
+                        return "Available";
+                    } else {
+                        return `Borrowed by: ${this.books[bookName].borrowed_by}`;
+                    }
+                }
+                return "Book not found";
+            }
+
+            getBookDescription(bookName) {
+                if (this.books[bookName]) {
+                    return this.books[bookName].description;
+                }
+                return "Book not found in library.";
+            }
+
+            getBookDetails(bookName) {
+                if (this.books[bookName]) {
+                    return this.books[bookName];
+                }
+                return null;
+            }
+
+            borrowBook(bookName, user) {
+                if (this.books[bookName]) {
+                    if (this.books[bookName].available) {
+                        this.books[bookName].available = false;
+                        this.books[bookName].borrowed_by = user;
+                        const timestamp = new Date().toLocaleString();
+                        this.history.push(`${timestamp}: ${user} borrowed '${bookName}'.`);
+                        this.saveData();
+                        return `You have successfully borrowed '${bookName}'.`;
+                    } else {
+                        return `'${bookName}' is currently borrowed by ${this.books[bookName].borrowed_by}.`;
+                    }
+                } else {
+                    return `The book '${bookName}' is not available in our library.`;
+                }
+            }
+
+            returnBook(bookName, user) {
+                if (this.books[bookName]) {
+                    if (!this.books[bookName].available) {
+                        if (this.books[bookName].borrowed_by === user) {
+                            this.books[bookName].available = true;
+                            this.books[bookName].borrowed_by = null;
+                            const timestamp = new Date().toLocaleString();
+                            this.history.push(`${timestamp}: ${user} returned '${bookName}'.`);
+                            this.saveData();
+                            return `You have successfully returned '${bookName}'.`;
+                        } else {
+                            return `This book was borrowed by ${this.books[bookName].borrowed_by}, not by ${user}.`;
+                        }
+                    } else {
+                        return `'${bookName}' is already available in the library.`;
+                    }
+                } else {
+                    return `The book '${bookName}' is not in our library catalog.`;
+                }
+            }
+
+            getTransactionHistory() {
+                return this.history;
+            }
+
+            greetUser() {
+                const currentHour = new Date().getHours();
+                if (currentHour < 12) {
+                    return "Good morning! How can I assist you today?";
+                } else if (currentHour < 18) {
+                    return "Good afternoon! How can I assist you today?";
+                } else {
+                    return "Good evening! How can I assist you today?";
+                }
+            }
+        }
+
+        // DOM Elements
+        const bookListBody = document.getElementById('bookListBody');
+        const searchInput = document.getElementById('searchInput');
+        const bookDetails = document.getElementById('bookDetails');
+        const userNameInput = document.getElementById('userName');
+        const borrowBtn = document.getElementById('borrowBtn');
+        const returnBtn = document.getElementById('returnBtn');
+        const historyBtn = document.getElementById('historyBtn');
+        const messageArea = document.getElementById('messageArea');
+        const historyModal = document.getElementById('historyModal');
+        const closeModal = document.getElementById('closeModal');
+        const historyContent = document.getElementById('historyContent');
+        const greetingElement = document.getElementById('greeting');
+
+        // Book Details Modal Elements
+        const bookDetailsModal = document.getElementById('bookDetailsModal');
+        const closeBookModal = document.getElementById('closeBookModal');
+        const modalBookTitle = document.getElementById('modalBookTitle');
+        const bookImage = document.getElementById('bookImage');
+        const bookAuthor = document.getElementById('bookAuthor');
+        const bookPublisher = document.getElementById('bookPublisher');
+        const bookYear = document.getElementById('bookYear');
+        const bookDescription = document.getElementById('bookDescription');
+        const bookStatus = document.getElementById('bookStatus');
+
+        // Initialize Library
+        const library = new Library();
+
+        // Display greeting
+        greetingElement.textContent = library.greetUser();
+
+        // Selected book tracking
+        let selectedBook = null;
+        
+        // Populate book list
+        function populateBookList(searchTerm = '') {
+            bookListBody.innerHTML = '';
+            const books = library.listAllBooks();
+            
+            books.forEach(book => {
+                if (searchTerm && !book.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    return;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="book-title">${book}</td>
+                    <td class="${library.books[book].available ? 'status-available' : 'status-borrowed'}">
+                        ${library.getBookStatus(book)}
+                    </td>
+                `;
+                
+                // Book title click for detailed modal
+                const titleCell = row.querySelector('.book-title');
+                titleCell.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent tr click event
+                    openBookModal(book);
+                });
+                
+                // Select row and show basic details
+                row.addEventListener('click', () => {
+                    // Remove selected class from all rows
+                    document.querySelectorAll('#bookListBody tr').forEach(r => 
+                        r.classList.remove('selected'));
+                    
+                    // Add selected class to clicked row
+                    row.classList.add('selected');
+                    
+                    // Update selected book
+                    selectedBook = book;
+                    
+                    // Update book details
+                    bookDetails.innerHTML = `
+                        <h3>${book}</h3>
+                        <p>${library.getBookDescription(book)}</p>
+                        <p><strong>Status:</strong> ${library.getBookStatus(book)}</p>
+                        <p><em>Click on the book title for more details</em></p>
+                    `;
+                });
+                
+                bookListBody.appendChild(row);
+            });
+        }
+
+        // Display detailed book information in modal
+        function openBookModal(bookName) {
+            const bookData = library.getBookDetails(bookName);
+            if (!bookData) return;
+            
+            modalBookTitle.textContent = bookName;
+            bookImage.src = bookData.image;
+            bookImage.alt = `Cover of ${bookName}`;
+            bookAuthor.textContent = bookData.author;
+            bookPublisher.textContent = bookData.publisher;
+            bookYear.textContent = bookData.year;
+            bookDescription.textContent = bookData.description;
+            bookStatus.textContent = library.getBookStatus(bookName);
+            bookStatus.className = bookData.available ? 'status-available' : 'status-borrowed';
+            
+            bookDetailsModal.style.display = 'block';
+        }
+
+        // Display message
+        function displayMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            messageElement.innerHTML = `
+                <span class="timestamp">${timeString}</span>
+                ${message}
+            `;
+            
+            messageArea.appendChild(messageElement);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', () => {
+            populateBookList(searchInput.value);
+        });
+
+        borrowBtn.addEventListener('click', () => {
+            if (!selectedBook) {
+                displayMessage('Please select a book first.');
+                return;
+            }
+            
+            const userName = userNameInput.value.trim();
+            if (!userName) {
+                displayMessage('Please enter your name.');
+                return;
+            }
+            
+            const result = library.borrowBook(selectedBook, userName);
+            displayMessage(result);
+            populateBookList(searchInput.value);
+        });
+
+        returnBtn.addEventListener('click', () => {
+            if (!selectedBook) {
+                displayMessage('Please select a book first.');
+                return;
+            }
+            
+            const userName = userNameInput.value.trim();
+            if (!userName) {
+                displayMessage('Please enter your name.');
+                return;
+            }
+            
+            const result = library.returnBook(selectedBook, userName);
+            displayMessage(result);
+            populateBookList(searchInput.value);
+        });
+
+        historyBtn.addEventListener('click', () => {
+            const history = library.getTransactionHistory();
+            
+            if (history.length === 0) {
+                historyContent.innerHTML = '<p>No transaction history available.</p>';
+            } else {
+                historyContent.innerHTML = history.map(entry => 
+                    `<p>${entry}</p>`
+                ).join('');
+            }
+            
+            historyModal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            historyModal.style.display = 'none';
+        });
+
+        closeBookModal.addEventListener('click', () => {
+            bookDetailsModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === historyModal) {
+                historyModal.style.display = 'none';
+            }
+            if (event.target === bookDetailsModal) {
+                bookDetailsModal.style.display = 'none';
+            }
+        });
+
+        // Initialize the app
+        populateBookList();
+        displayMessage('Welcome to the Library Management System!');
+    </script>
+</body>
+</html>
